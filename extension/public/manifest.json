@@ -1,0 +1,26 @@
+{
+    "manifest_version": 3,
+    "name": "WebDuels Chrome Extension",
+    "version": "1.0.0",
+    "description": "A simple React app as a Chrome extension",
+    "action": {
+      "default_popup": "index.html"
+    },
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "tabs"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; img-src * data: https:"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["DOMParser.js"]
+        }
+    ]
+  }
