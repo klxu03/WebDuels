@@ -15,28 +15,39 @@ const fetchPokemonData = async () => {
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("sender", sender, "sent a request", request)
-    // Query for the active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-    if (tabs.length === 0 || !tabs[0].id) {
-        sendResponse({ status: "No active tab" });
+
+    if (request.type === "GET_DOM") {
+        // Query for the active tab
+        chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+        if (tabs.length === 0 || !tabs[0].id) {
+            sendResponse({ status: "No active tab" });
+            return;
+        }
+        console.log("tab id", tabs[0].id)
+
+        const data = await fetchPokemonData();
+
+        // Send a message to the content script in the active tab
+        chrome.tabs.sendMessage(tabs[0].id, { message: "GET_DOM", data, tabId: tabs[0].id }, (response) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error from content script:", chrome.runtime.lastError.message);
+                sendResponse({ status: "Error", error: chrome.runtime.lastError.message });
+            } else {
+                console.log("Response from content script:", response);
+                sendResponse(response);
+            }
+        });
+
+        return true;  // Keeps the message channel open for async response
+        });
+    } else if (request.type === "PING") {
+        console.log("Received PING from content script, PONGing back");
+        chrome.tabs.sendMessage(request.tabId, { type: "PONG" });
+
+        return true;
+    } else {
         return;
     }
-
-    const data = await fetchPokemonData();
-
-    // Send a message to the content script in the active tab
-    chrome.tabs.sendMessage(tabs[0].id, { message: "GET_DOM", data }, (response) => {
-        if (chrome.runtime.lastError) {
-            console.error("Error from content script:", chrome.runtime.lastError.message);
-            sendResponse({ status: "Error", error: chrome.runtime.lastError.message });
-        } else {
-            console.log("Response from content script:", response);
-            sendResponse(response);
-        }
-    });
-
-    return true;  // Keeps the message channel open for async response
-    });
 
     return true;  // Keeps the message channel open
 });
