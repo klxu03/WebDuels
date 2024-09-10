@@ -21,6 +21,7 @@ export default defineConfig({
       input: {
         main: './index.html',
         DOMParser: resolve(__dirname, "src/content/DOMParser.ts"),
+        ScreenshotHandler: resolve(__dirname, "src/content/ScreenshotHandler.ts"),
         background: resolve(__dirname, "src/background/background.ts"),
       },
       output: {

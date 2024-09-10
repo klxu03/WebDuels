@@ -11,7 +11,7 @@ const fetchPokemonData = async () => {
   console.log({data});
   return data;
 };
- 
+
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("sender", sender, "sent a request", request)
@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const data = await fetchPokemonData();
 
         // Send a message to the content script in the active tab
-        chrome.tabs.sendMessage(tabs[0].id, { message: "GET_DOM", data, tabId: tabs[0].id }, (response) => {
+        chrome.tabs.sendMessage(tabs[0].id, { type: "GET_DOM", data, tabId: tabs[0].id }, (response) => {
             if (chrome.runtime.lastError) {
                 console.error("Error from content script:", chrome.runtime.lastError.message);
                 sendResponse({ status: "Error", error: chrome.runtime.lastError.message });
@@ -45,7 +45,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.tabs.sendMessage(request.tabId, { type: "PONG" });
 
         return true;
-    } else {
+    } else if (request.type === "TAKE_SCREENSHOT") {
+        console.log("Received TAKE_SCREENSHOT to background");
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            const tab = tabs[0];
+            if (tab.id) {
+                chrome.tabs.captureVisibleTab({ format: "png" }, (dataUrl) => {
+                    chrome.tabs.sendMessage(tab.id!, { action: "processScreenshot", dataUrl})
+                });
+            }
+        })
+    } else if (request.type === "TAKE_FULL_PAGE_SCREENSHOT") {
         return;
     }
 

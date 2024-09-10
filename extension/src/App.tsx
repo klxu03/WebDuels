@@ -11,7 +11,6 @@ function App() {
   const [pokemonData, setPokemonData] = useState<any>(null);
 
   const getSiteInfo = () => {
-
     if (chrome.runtime) {
       chrome.runtime.sendMessage({ type: "GET_DOM" } as DOMMessage,
         (response: DOMMessageResponse) => {
@@ -23,6 +22,13 @@ function App() {
       )
     } else {
       console.log("chrome.runtime is not available")
+    }
+  }
+
+  const takeScreenshot = (full: boolean) => {
+    if (chrome.runtime) {
+      console.log("Sending a takeScreenshot to background", full);
+      chrome.runtime.sendMessage({type: full ? "TAKE_FULL_PAGE_SCREENSHOT" : "TAKE_SCREENSHOT"});
     }
   }
 
@@ -48,6 +54,12 @@ function App() {
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
+      </div>
+      <div>
+        <h1>Screenshot Extension</h1>
+        <button onClick={() => takeScreenshot(false)}>
+          Capture Visible Area
+        </button>
       </div>
       <div>
         <button onClick={getSiteInfo}>
