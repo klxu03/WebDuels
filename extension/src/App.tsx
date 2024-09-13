@@ -60,6 +60,9 @@ function App() {
         <button onClick={() => takeScreenshot(false)}>
           Capture Visible Area
         </button>
+        <button onClick={() => takeScreenshot(true)}>
+          Capture Full Page
+        </button>
       </div>
       <div>
         <button onClick={getSiteInfo}>
